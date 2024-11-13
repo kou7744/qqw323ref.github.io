@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple File Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #file-list {
+            margin-top: 20px;
+        }
+        .file-item {
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            cursor: pointer;
+        }
+        .file-item:hover {
+            background-color: #f0f0f0;
+        }
+        .file-name {
+            margin-right: 10px;
+        }
+        .media-preview {
+            max-width: 100%;
+            max-height: 300px;
+            margin-top: 10px;
+        }
+        .actions {
+            margin-top: 10px;
+        }
+        .actions button {
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Simple File Manager</h1>
+    <input type="file" id="file-input" multiple>
+    <button onclick="uploadFiles()">Upload Files</button>
+    <div id="file-list"></div>
+
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const fileListDiv = document.getElementById('file-list');
+        let files = [];
+
+        function uploadFiles() {
+            files = Array.from(fileInput.files);
+            displayFiles();
+        }
+
+        function displayFiles() {
+            fileListDiv.innerHTML = '';
+            files.forEach((file, index) => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <span class="file-name">${file.name}</span>
+                    <div class="actions">
+                        <button onclick="downloadFile(${index})">Download</button>
+                        <button onclick="deleteFile(${index})">Delete</button>
+                    </div>
+                `;
+
+                const preview = createMediaPreview(file);
+                if (preview) {
+                    fileItem.appendChild(preview);
+                }
+
+                fileListDiv.appendChild(fileItem);
+            });
+        }
+
+        function downloadFile(index) {
+            const file = files[index];
+            const url = URL.createObjectURL(file);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        function deleteFile(index) {
+            files.splice(index, 1);
+            displayFiles();
+        }
+
+        function createMediaPreview(file) {
+            const type = file.type.split('/')[0];
+            if (type === 'image') {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.className = 'media-preview';
+                return img;
+            } else if (type === 'video') {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.controls = true;
+                video.className = 'media-preview';
+                return video;
+            } else if (type === 'audio') {
+                const audio = document.createElement('audio');
+                audio.src = URL.createObjectURL(file);
+                audio.controls = true;
+                audio.className = 'media-preview';
+                return audio;
+            }
+            return null;
+        }
+    </script>
+</body>
+</html>
